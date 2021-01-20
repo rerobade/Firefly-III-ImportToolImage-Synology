@@ -35,12 +35,6 @@ jobs:
     vmImage: 'ubuntu-16.04'
     name: Default
   steps:
-  - checkout: self
-    persistCredentials: true
-  - script: |
-      git config --global user.email "james@firefly-iii.org"
-      git config --global user.name "James Cole"
-    displayName: 'Do Git config'
   - script: |
       set -euo pipefail
       sudo rm -rf /var/lib/apt/lists/*
