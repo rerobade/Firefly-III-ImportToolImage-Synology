@@ -66,7 +66,6 @@ jobs:
     displayName: 'Set up builder'
 
   - script: |
-      cd ImportToolImage
       echo "Docker username = '$(DOCKERUSERNAME)'."
       echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
       docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:latest --push . -f Dockerfile
