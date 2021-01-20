@@ -67,7 +67,7 @@ jobs:
 
       if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
         echo "Version is '${{ parameters.buildVersion }}' so second label will be '${{ parameters.repository }}:version-${{ parameters.buildVersion }}'."
-        #docker buildx build  --build-arg version=$VERSION --platform $PLATFORMS -t $REPOS_NAME:version-$VERSION --push . -f Dockerfile
+        echo docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:version-${{ parameters.buildVersion }} --push . -f Dockerfile
       fi
 
       echo docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:$LABEL --push . -f Dockerfile
