@@ -35,7 +35,13 @@ jobs:
     vmImage: 'ubuntu-16.04'
     name: Default
   steps:
+  steps:
+  - checkout: self
+    persistCredentials: true
   - script: |
+      git config --global user.email "james@firefly-iii.org"
+      git config --global user.name "James Cole"
+      cd ImportToolImage
       set -euo pipefail
       sudo rm -rf /var/lib/apt/lists/*
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -49,24 +55,16 @@ jobs:
       echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
       sudo service docker restart
 
-      echo "Docker username = '$(DOCKERUSERNAME)'."
-
       docker version -f '{{.Server.Experimental}}'
       docker version
-    displayName: 'Verify Docker installation.'
-
-  - script: |
       echo "Docker username = '$(DOCKERUSERNAME)'."
       whoami
       echo "I am $(whoami)"
+      ls
       docker run --rm --privileged multiarch/qemu-user-static --reset -p yes i
       docker buildx create --name firefly_iii_builder
       docker buildx inspect firefly_iii_builder --bootstrap
       docker buildx use firefly_iii_builder
-    displayName: 'Set up builder'
-
-  - script: |
-      echo "Docker username = '$(DOCKERUSERNAME)'."
       echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
       docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:latest --push . -f Dockerfile
     displayName: 'Build!'
