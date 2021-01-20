@@ -65,6 +65,20 @@ jobs:
 
       LABEL=${{ parameters.buildVersion }}
 
+      # if the version is an alpha version, push to "alpha":
+      if [[ ${{ parameters.buildVersion }} == *"alpha"* ]]; then
+        LABEL="alpha"
+      fi
+
+      # if the version is a beta version, push to "beta":
+      if [[ ${{ parameters.buildVersion }} == *"beta"* ]]; then
+        LABEL="beta"
+      fi
+
+      if [[ ${{ parameters.buildVersion }} != *"beta"* && ${{ parameters.buildVersion }} != *"alpha"* && ${{ parameters.buildVersion }} != *"develop"* ]]; then
+        LABEL="latest"
+      fi
+
       if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
         echo "Version is '${{ parameters.buildVersion }}' so second label will be '${{ parameters.repository }}:version-${{ parameters.buildVersion }}'."
         echo docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:version-${{ parameters.buildVersion }} --push . -f Dockerfile
