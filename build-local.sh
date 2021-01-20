@@ -4,20 +4,20 @@
 # Step 1: set repos name.
 #
 #REPOS_NAME=jc5x/test-repository
-REPOS_NAME=fireflyiii/csv-importer
+REPOS_NAME=jc5x/test-repository
 
-PLATFORMS=linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/386
+PLATFORMS=linux/amd64
+
+VERSION="${VERSION:-develop}"
+IMPORTER="${IMPORTER:-csv}"
+APACHE_PLATFORM="${APACHE_PLATFORM:-7.4}"
 
 #
 # Step 2: echo some info
 #
-echo "build-travis.sh v1.1 (2021-01-02): I am building '${VERSION}' for ${REPOS_NAME}."
-
-
+echo "build-travis.sh v1.2 (2021-01-20): I am building '${VERSION}' for ${REPOS_NAME} (${IMPORTER})."
 
 # new script start
-
-echo "Current directory is $DIR"
 
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes i
 docker buildx create --name firefly_iii_builder
@@ -44,11 +44,6 @@ fi
 echo "Version is '$VERSION' so label will be '$REPOS_NAME:$LABEL'."
 
 # build CSV
-docker buildx build  --build-arg version=$VERSION --platform $PLATFORMS -t $REPOS_NAME:$LABEL --push . -f Dockerfile
-
-if [[ $VERSION != "develop" ]]; then
-	echo "Version is '$VERSION' so second label will be '$REPOS_NAME:version-$VERSION'."
-	docker buildx build  --build-arg version=$VERSION --platform $PLATFORMS -t $REPOS_NAME:version-$VERSION --push . -f Dockerfile
-fi
+docker buildx build  --build-arg version=$VERSION --build-arg apache_platform=$APACHE_PLATFORM --build-arg importer=$IMPORTER --platform $PLATFORMS -t $REPOS_NAME:$VERSION --push . -f Dockerfile
 
 echo "Done!"

@@ -15,6 +15,10 @@ parameters:
   displayName: Build import tools
   type: string
   default: csv
+- name: buildVersion
+  displayName: Which version to build
+  type: string
+  default: develop
 - name: platforms
   displayName: Build platforms
   type: string
@@ -71,8 +75,7 @@ jobs:
       cd ImportToolImage
       echo "Docker username = '$(DOCKERUSERNAME)'."
       echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
-      #cd ${{ parameters.buildImageType }}-${{ parameters.buildPhpVersion }}/
-      #docker buildx build --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:${{ parameters.buildImageType }}-${{ parameters.buildPhpVersion }} --push . -f Dockerfile
+      docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:latest --push . -f Dockerfile
     displayName: 'Build!'
 
   - checkout: self
