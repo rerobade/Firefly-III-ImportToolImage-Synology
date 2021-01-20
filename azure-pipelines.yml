@@ -35,7 +35,6 @@ jobs:
     vmImage: 'ubuntu-16.04'
     name: Default
   steps:
-  steps:
   - checkout: self
     persistCredentials: true
   - script: |
