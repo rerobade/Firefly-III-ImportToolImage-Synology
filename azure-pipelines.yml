@@ -57,13 +57,20 @@ jobs:
       echo "Docker username = '$(DOCKERUSERNAME)'."
       whoami
       echo "I am $(whoami)"
-      ls
       docker run --rm --privileged multiarch/qemu-user-static --reset -p yes i
       docker buildx create --name firefly_iii_builder
       docker buildx inspect firefly_iii_builder --bootstrap
       docker buildx use firefly_iii_builder
       echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
-      docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:latest --push . -f Dockerfile
+
+      LABEL=${{ parameters.buildVersion }}
+
+      if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
+        echo "Version is '${{ parameters.buildVersion }}' so second label will be '${{ parameters.repository }}:version-${{ parameters.buildVersion }}'."
+        #docker buildx build  --build-arg version=$VERSION --platform $PLATFORMS -t $REPOS_NAME:version-$VERSION --push . -f Dockerfile
+      fi
+
+      echo docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:$LABEL --push . -f Dockerfile
     displayName: 'Build!'
 
   - checkout: self
