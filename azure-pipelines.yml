@@ -23,10 +23,6 @@ parameters:
   displayName: Build platforms
   type: string
   default: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/386
-- name: repository
-  displayName: Repository name to push to
-  type: string
-  default: fireflyiii/csv-importer
 
 jobs:
 - job: Jobbie
@@ -81,11 +77,11 @@ jobs:
       fi
 
       if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
-        echo "Version is '${{ parameters.buildVersion }}' so second label will be '${{ parameters.repository }}:version-${{ parameters.buildVersion }}'."
-        docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:version-${{ parameters.buildVersion }} --push . -f Dockerfile
+        echo "Version is '${{ parameters.buildVersion }}' so second label will be 'fireflyiii/{{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }}'."
+        docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/{{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
       fi
 
-      docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t ${{ parameters.repository }}:$LABEL --push . -f Dockerfile
+      docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/{{ parameters.buildImportTool }}-importer:$LABEL --push . -f Dockerfile
     displayName: 'Build!'
 
   - checkout: self
