@@ -78,10 +78,10 @@ jobs:
 
       if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
         echo "Version is '${{ parameters.buildVersion }}' so second label will be 'fireflyiii/{{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }}'."
-        docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/{{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
+        echo docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/{{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
       fi
 
-      docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/{{ parameters.buildImportTool }}-importer:$LABEL --push . -f Dockerfile
+      echo docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/{{ parameters.buildImportTool }}-importer:$LABEL --push . -f Dockerfile
     displayName: 'Build!'
 
   - checkout: self
