@@ -1,0 +1,81 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+pr: none
+
+parameters:
+- name: buildPhpVersion
+  displayName: Build PHP version
+  type: string
+  default: 7.4
+- name: buildImportTool
+  displayName: Build import tools
+  type: string
+  default: csv
+- name: buildVersion
+  displayName: Which version to build
+  type: string
+  default: develop
+- name: platforms
+  displayName: Build platforms
+  type: string
+  default: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/386
+
+jobs:
+- job: Jobbie2
+  timeoutInMinutes: 360
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - checkout: self
+    persistCredentials: true
+  - script: |
+      git config --global user.email "james@firefly-iii.org"
+      git config --global user.name "James Cole"
+      cd ImportToolImage
+      sudo rm -rf /var/lib/apt/lists/*
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) edge"
+      sudo apt-get update
+      sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+
+      echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+      mkdir -p $HOME/.docker
+      touch $HOME/.docker/config.json
+      echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+      sudo service docker restart
+      docker run --rm --privileged multiarch/qemu-user-static --reset -p yes i
+      docker buildx create --name firefly_iii_builder
+      docker buildx inspect firefly_iii_builder --bootstrap
+      docker buildx use firefly_iii_builder
+      echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
+
+      LABEL=${{ parameters.buildVersion }}
+
+      # if the version is an alpha version, push to "alpha":
+      if [[ ${{ parameters.buildVersion }} == *"alpha"* ]]; then
+        LABEL="alpha"
+      fi
+
+      # if the version is a beta version, push to "beta":
+      if [[ ${{ parameters.buildVersion }} == *"beta"* ]]; then
+        LABEL="beta"
+      fi
+
+      if [[ ${{ parameters.buildVersion }} != *"beta"* && ${{ parameters.buildVersion }} != *"alpha"* && ${{ parameters.buildVersion }} != *"develop"* ]]; then
+        LABEL="latest"
+      fi
+
+      if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
+        echo "Version is '${{ parameters.buildVersion }}' so second label will be 'fireflyiii/${{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }}'."
+        docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/${{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
+      fi
+
+      docker buildx build  --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/${{ parameters.buildImportTool }}-importer:$LABEL --push . -f Dockerfile
+    displayName: 'Build!'
+
+  - checkout: self
+    clean: true
