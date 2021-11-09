@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Now in entrypoint.sh (v1.3) for the Firefly III CSV importer."
+echo "Now in entrypoint.sh (v1.4), generic Firefly III importer."
 echo "Please wait for the container to start..."
 
 # set docker var.
