@@ -35,6 +35,23 @@ jobs:
     persistCredentials: true
   - script: |
       cd ImportToolImage
+
+      # script for counter
+      git switch -c main
+      git branch --set-upstream-to=origin/main main
+      echo "Update counters"
+      BUILDNR=$(<"counter.txt")
+      BUILDNR=$((BUILDNR + 1))
+      echo $BUILDNR > counter.txt
+      echo $(date '+%d-%m-%Y %T %Z') > date.txt
+      git pull
+      git status
+      git add counter.txt
+      git add date.txt
+      git commit -m "Auto-update build files."
+      git push
+      # end counter script.
+
       docker run --rm --privileged multiarch/qemu-user-static --reset -p yes i
       docker buildx create --name firefly_iii_builder
       docker buildx inspect firefly_iii_builder --bootstrap
