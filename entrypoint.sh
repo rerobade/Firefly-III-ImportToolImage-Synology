@@ -1,7 +1,12 @@
 #!/bin/bash
 
-echo "Now in entrypoint.sh (v1.4), generic Firefly III importer."
-echo "Please wait for the container to start..."
+echo "Now in entrypoint.sh for Firefly III Data Importer"
+echo "Script:        1.5 (2021-12-05)"
+echo "User:          '$(whoami)'"
+echo "Group:         '$(id -g -n)'"
+echo "Working dir:   '$(pwd)'"
+echo "Build number:  $(cat /var/www/counter-main.txt)"
+echo "Build date:    $(cat /var/www/build-date-main.txt)"
 
 # set docker var.
 export IS_DOCKER=true
