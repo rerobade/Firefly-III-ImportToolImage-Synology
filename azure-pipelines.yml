@@ -14,7 +14,7 @@ parameters:
 - name: buildImportTool
   displayName: Build import tools
   type: string
-  default: csv
+  default: data
 - name: buildVersion
   displayName: Which version to build
   type: string
@@ -27,6 +27,8 @@ parameters:
 jobs:
 - job: Jobbie
   timeoutInMinutes: 360
+  workspace:
+    clean: all
   pool:
     vmImage: 'ubuntu-16.04'
     name: Default
