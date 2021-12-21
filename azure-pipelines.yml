@@ -50,7 +50,7 @@ jobs:
       git status
       git add counter.txt
       git add date.txt
-      git commit -m "Auto-update build files."
+      git commit -m "Auto-update build files for build #${BUILDNR}."
       git push
       # end counter script.
 
