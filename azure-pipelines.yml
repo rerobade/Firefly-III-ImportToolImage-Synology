@@ -11,10 +11,6 @@ parameters:
   displayName: Build PHP version
   type: string
   default: 8.0
-- name: buildImportTool
-  displayName: Build import tools
-  type: string
-  default: data
 - name: buildVersion
   displayName: Which version to build
   type: string
@@ -77,11 +73,11 @@ jobs:
       fi
 
       if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
-        echo "Version is '${{ parameters.buildVersion }}' so second label will be 'fireflyiii/${{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }}'."
-        docker buildx build --no-cache --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/${{ parameters.buildImportTool }}-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
+        echo "Version is '${{ parameters.buildVersion }}' so second label will be 'fireflyiii/data-importer:version-${{ parameters.buildVersion }}'."
+        docker buildx build --no-cache --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=data --platform ${{ parameters.platforms }} -t fireflyiii/data-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
       fi
 
-      docker buildx build --no-cache --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=${{ parameters.buildImportTool }} --platform ${{ parameters.platforms }} -t fireflyiii/${{ parameters.buildImportTool }}-importer:$LABEL --push . -f Dockerfile
+      docker buildx build --no-cache --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=data --platform ${{ parameters.platforms }} -t fireflyiii/data-importer:$LABEL --push . -f Dockerfile
     displayName: 'Build!'
 
   - checkout: self
