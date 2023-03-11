@@ -57,6 +57,8 @@ jobs:
       docker buildx use firefly_iii_builder
     displayName: 'Set up builder'
   - script: |
+      set -euo pipefail
+      cd ImportToolImage
       # start of script
       # label
       VERSION=${{ parameters.buildVersion }}
