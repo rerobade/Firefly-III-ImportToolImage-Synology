@@ -96,7 +96,7 @@ jobs:
           --build-arg VERSION \
           --build-arg version=$VERSION \
           --build-arg build_version=$VERSION \
-          --build-arg build_base=${{ parameters.buildImageType }} \
+          --build-arg build_base=apache \
           --build-arg importer=data \
           --build-arg build_platform=${{ parameters.buildPhpVersion }} \
           --build-arg apache_platform=${{ parameters.buildPhpVersion }} \
@@ -112,7 +112,7 @@ jobs:
           --build-arg VERSION \
           --build-arg version=$VERSION \
           --build-arg build_version=$VERSION \
-          --build-arg build_base=${{ parameters.buildImageType }} \
+          --build-arg build_base=apache \
           --build-arg importer=data \
           --build-arg build_platform=${{ parameters.buildPhpVersion }} \
           --build-arg apache_platform=${{ parameters.buildPhpVersion }} \
@@ -147,7 +147,7 @@ jobs:
           --build-arg VERSION \
           --build-arg version=$VERSION \
           --build-arg build_version=$VERSION \
-          --build-arg build_base=${{ parameters.buildImageType }} \
+          --build-arg build_base=apache \
           --build-arg importer=data \
           --build-arg build_platform=${{ parameters.buildPhpVersion }} \
           --build-arg apache_platform=${{ parameters.buildPhpVersion }} \
