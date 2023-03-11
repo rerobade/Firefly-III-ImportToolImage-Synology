@@ -49,35 +49,115 @@ jobs:
       git commit -m "Auto-update build files for build #${BUILDNR}."
       git push
       # end counter script.
-
+    displayName: 'Set up counter'
+  - script: |
       docker run --rm --privileged multiarch/qemu-user-static --reset -p yes i
       docker buildx create --name firefly_iii_builder
       docker buildx inspect firefly_iii_builder --bootstrap
       docker buildx use firefly_iii_builder
       echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
+    displayName: 'Set up builder'
+  - script: |
+      # start of script
+      # label
+      VERSION=${{ parameters.buildVersion }}
+      LABEL=$VERSION
 
-      LABEL=${{ parameters.buildVersion }}
+      echo "Input 'LABEL' is $LABEL"
+      echo "Input 'VERSION' is $VERSION"
 
       # if the version is an alpha version, push to "alpha":
-      if [[ ${{ parameters.buildVersion }} == *"alpha"* ]]; then
+      if [[ $VERSION == *"alpha"* ]]; then
         LABEL="alpha"
+        echo "Recognized version as alpha: '$VERSION'"
       fi
 
       # if the version is a beta version, push to "beta":
-      if [[ ${{ parameters.buildVersion }} == *"beta"* ]]; then
+      if [[ $VERSION == *"beta"* ]]; then
+        echo "Recognized version as beta: '$VERSION'"
         LABEL="beta"
       fi
 
-      if [[ ${{ parameters.buildVersion }} != *"beta"* && ${{ parameters.buildVersion }} != *"alpha"* && ${{ parameters.buildVersion }} != *"develop"* ]]; then
+      if [[ $VERSION != *"beta"* && $VERSION != *"alpha"* && $VERSION != *"dev"* ]]; then
+        echo "Recognized version as production: '$VERSION'"
         LABEL="latest"
       fi
 
-      if [[ ${{ parameters.buildVersion }} != "develop" ]]; then
-        echo "Version is '${{ parameters.buildVersion }}' so second label will be 'fireflyiii/data-importer:version-${{ parameters.buildVersion }}'."
-        docker buildx build --no-cache --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=data --platform ${{ parameters.platforms }} -t fireflyiii/data-importer:version-${{ parameters.buildVersion }} --push . -f Dockerfile
+      echo "---"
+      echo "final label is '$LABEL'"
+      echo "final version is '$VERSION'"
+
+      # build $LABEL when it's a develop version
+      if [[ $VERSION == *"dev"* ]]; then
+        echo "Will build development under tag '$LABEL'."
+        docker buildx build --pull  --progress=plain \
+          --no-cache \
+          --platform ${{ parameters.platforms }} \
+          --build-arg VERSION \
+          --build-arg version=$VERSION \
+          --build-arg build_version=$VERSION \
+          --build-arg build_base=${{ parameters.buildImageType }} \
+          --build-arg importer=data \
+          --build-arg build_platform=${{ parameters.buildPhpVersion }} \
+          --build-arg apache_platform=${{ parameters.buildPhpVersion }} \
+          -t fireflyiii/data-importer:$LABEL --push .
       fi
 
-      docker buildx build --no-cache --build-arg version=${{ parameters.buildVersion }} --build-arg apache_platform=${{ parameters.buildPhpVersion }} --build-arg importer=data --platform ${{ parameters.platforms }} -t fireflyiii/data-importer:$LABEL --push . -f Dockerfile
+      # build alpha or beta when it's alpha or beta
+      if [[ $VERSION == *"beta"* || $VERSION == *"alpha"* ]]; then
+        echo "Will build or alpha or beta version under tag '$LABEL' and '$VERSION'."
+        docker buildx build --pull  --progress=plain \
+          --no-cache \
+          --platform ${{ parameters.platforms }} \
+          --build-arg VERSION \
+          --build-arg version=$VERSION \
+          --build-arg build_version=$VERSION \
+          --build-arg build_base=${{ parameters.buildImageType }} \
+          --build-arg importer=data \
+          --build-arg build_platform=${{ parameters.buildPhpVersion }} \
+          --build-arg apache_platform=${{ parameters.buildPhpVersion }} \
+          --tag fireflyiii/data-importer:$LABEL \
+          --tag fireflyiii/data-importer:$VERSION \
+          --push .
+      fi
+
+      # build label AND version-$VERSION if not "develop" and not alpha or beta.
+      if [[ $VERSION != *"beta"* && $VERSION != *"alpha"* && $VERSION != *"dev"* ]]; then
+        echo "Will build prod version '$VERSION' under tag '$LABEL'."
+        
+        currentversion=$VERSION
+        # if starts with "v", remove the "v":
+        if [[ $currentversion == v* ]]; then
+          currentversion=${currentversion#*v} 
+          echo "version is now $currentversion"
+        fi
+
+
+        # split the version into parts:
+        split=( ${currentversion//./ } )
+
+        echo "Will build production version as '$LABEL'"
+        echo "Will build production version as 'version-${split[0]}'"
+        echo "Will build production version as 'version-${split[0]}.${split[1]}'"
+        echo "Will build production version as 'version-$currentversion'"
+
+        # build major tag
+        docker buildx build --progress=plain --no-cache \
+          --platform ${{ parameters.platforms }} \
+          --build-arg VERSION \
+          --build-arg version=$VERSION \
+          --build-arg build_version=$VERSION \
+          --build-arg build_base=${{ parameters.buildImageType }} \
+          --build-arg importer=data \
+          --build-arg build_platform=${{ parameters.buildPhpVersion }} \
+          --build-arg apache_platform=${{ parameters.buildPhpVersion }} \
+          --tag fireflyiii/data-importer:$LABEL \
+          --tag fireflyiii/data-importer:version-${split[0]} \
+          --tag fireflyiii/data-importer:version-${split[0]}.${split[1]} \
+          --tag fireflyiii/data-importer:version-$currentversion \
+          --push .
+
+      fi
     displayName: 'Build!'
 
   - checkout: self
