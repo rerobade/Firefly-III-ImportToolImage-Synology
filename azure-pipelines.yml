@@ -55,7 +55,6 @@ jobs:
       docker buildx create --name firefly_iii_builder
       docker buildx inspect firefly_iii_builder --bootstrap
       docker buildx use firefly_iii_builder
-      echo $(DOCKERPASSWORD) | docker login --username $(DOCKERUSERNAME) --password-stdin
     displayName: 'Set up builder'
   - script: |
       # start of script
