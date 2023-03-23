@@ -1,5 +1,5 @@
-ARG apache_platform
-FROM fireflyiii/base:apache-$apache_platform
+ARG build_base_image=fireflyiii/base:apache-8.2
+FROM $build_base_image
 
 # See also: https://github.com/JC5/firefly-iii-base-image
 
