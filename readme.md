@@ -1,4 +1,4 @@
-# Official Firefly III CSV Importer Docker image
+# Copy of Official Firefly III CSV Importer Docker image to show how to make it compatible with my Synology NAS
 
 [![Packagist](https://img.shields.io/packagist/v/firefly-iii/csv-importer.svg?style=flat-square)](https://packagist.org/packages/firefly-iii/csv-importer) 
 [![License](https://img.shields.io/github/license/firefly-iii/csv-importer.svg?style=flat-square])](https://www.gnu.org/licenses/agpl-3.0.html) 
